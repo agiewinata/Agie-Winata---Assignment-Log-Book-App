@@ -91,26 +91,26 @@ global.assignments = global.assignments || [
   {
     id: 1,
     title: "REST API Design",
-    subject: "Web Programming",
-    dueDate: "2026-03-10",
     description: "Design and build a REST API using Next.js",
-    createdAt: "2026-03-01T08:00:00.000Z"
+    status: "On Process",
+    assignmentDate: "2026-03-01T08:00:00.000Z",
+    dueDate: "2026-03-10"
   },
   {
     id: 2,
     title: "Database Normalization",
-    subject: "Database Systems",
-    dueDate: "2026-03-12",
     description: "Normalize a given database schema to 3NF",
-    createdAt: "2026-03-02T09:00:00.000Z"
+    status: "Create",
+    assignmentDate: "2026-03-02T09:00:00.000Z",
+    dueDate: "2026-03-12"
   },
   {
     id: 3,
     title: "Binary Search Tree",
-    subject: "Data Structures",
-    dueDate: "2026-03-15",
     description: "Implement a BST with insert, delete, and search",
-    createdAt: "2026-03-03T10:00:00.000Z"
+    status: "Submitted",
+    assignmentDate: "2026-03-03T10:00:00.000Z",
+    dueDate: "2026-03-15"
   }
 ];
 
@@ -122,11 +122,19 @@ export async function GET() {
 
 export async function POST(request) {
   const body = await request.json();
-  const { title, subject, dueDate, description } = body;
+  const { title, description, dueDate, status } = body;
 
-  if (!title || !subject || !dueDate) {
+  if (!title || !dueDate) {
     return NextResponse.json(
-      { success: false, message: 'title, subject, and dueDate are required' },
+      { success: false, message: 'title and dueDate are required' },
+      { status: 400 }
+    );
+  }
+
+  const validStatuses = ['Create', 'On Process', 'Submitted'];
+  if (status && !validStatuses.includes(status)) {
+    return NextResponse.json(
+      { success: false, message: 'status must be Create, On Process, or Submitted' },
       { status: 400 }
     );
   }
@@ -134,10 +142,10 @@ export async function POST(request) {
   const newAssignment = {
     id: global.nextId,
     title,
-    subject,
-    dueDate,
     description: description || '',
-    createdAt: new Date().toISOString()
+    status: status || 'Create',
+    assignmentDate: new Date().toISOString(),
+    dueDate
   };
 
   global.assignments.push(newAssignment);

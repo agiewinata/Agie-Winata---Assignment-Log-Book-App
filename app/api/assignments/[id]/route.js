@@ -93,11 +93,19 @@ export async function PUT(request, { params }) {
   }
 
   const body = await request.json();
-  const { title, subject, dueDate, description } = body;
+  const { title, description, dueDate, status } = body;
 
-  if (!title || !subject || !dueDate) {
+  if (!title || !dueDate) {
     return NextResponse.json(
-      { success: false, message: 'title, subject, and dueDate are required' },
+      { success: false, message: 'title and dueDate are required' },
+      { status: 400 }
+    );
+  }
+
+  const validStatuses = ['Create', 'On Process', 'Submitted'];
+  if (status && !validStatuses.includes(status)) {
+    return NextResponse.json(
+      { success: false, message: 'status must be Create, On Process, or Submitted' },
       { status: 400 }
     );
   }
@@ -105,10 +113,9 @@ export async function PUT(request, { params }) {
   global.assignments[index] = {
     ...global.assignments[index],
     title,
-    subject,
-    dueDate,
     description: description || '',
-    updatedAt: new Date().toISOString()
+    status: status || global.assignments[index].status,
+    dueDate
   };
 
   return NextResponse.json({ success: true, data: global.assignments[index] });
@@ -131,4 +138,4 @@ export async function DELETE(request, { params }) {
     message: 'Assignment deleted successfully',
     data: deleted[0]
   });
-}
+} 
